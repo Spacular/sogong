@@ -12,7 +12,7 @@
 Connection conn = null;
 PreparedStatement pstmt = null;
 	
-	try{ ::)
+	try{
 		String url = "jdbc:mysql://localhost:3307/attendance";
 		String DbId = "root";
 		String DbPass = "542133tlatms";
