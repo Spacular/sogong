@@ -24,7 +24,7 @@ PreparedStatement pstmt = null;
 		// 여기까지 db접속 및 체크에 필요한 모든 과정임.
 		
 		String chk = "select ID from stuinfo where ID=" + ID;	// 학생테이블에서 주키는 ID이므로 ID로 검색한다.
-		String sql = "insert into stuinfo values(?,?)";				// 일단 빈 레코드를 만든 다음
+		String sql = "insert into stuinfo values(?, ?, ?)";				// 일단 빈 레코드를 만든 다음
 		ResultSet result = null;
 		
 		pstmt = conn.prepareStatement(chk);
@@ -37,6 +37,7 @@ PreparedStatement pstmt = null;
 		pstmt = conn.prepareStatement(sql);
 		pstmt.setString(1, ID);
 		pstmt.setString(2, Passwd);		// 중복이 아니면 레코드를 설정해준다.
+		pstmt.setInt(3, 0);					// 관리자 여부 속성
 		pstmt.executeUpdate();			// select 문에서 쓰이는 commit 구문.
 		out.println("attendance 테이블에 새로운 레코드를 추가했습니다!\n");
 	}
