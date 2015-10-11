@@ -5,6 +5,9 @@
 <!DOCTYPE html>
 <html>
 <head>
+<script>
+	 
+</script>
 <meta charset="UTF-8">
 <meta name = "viewport" content = "width=device-width, initial-scale=1.0"/>
 <% request.setCharacterEncoding("utf-8"); %>
@@ -50,7 +53,7 @@
 		</dd>
 	</dl>
 	<dd>
-		<input type = "submit" value = "로그인">
+		<input type = "submit" id="login" value = "로그인">
 	</dd>
 </form>
 <form method = "post" action = "register.jsp">
