@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
+﻿<%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ page import = "java.sql.*" %>
 <!DOCTYPE html>
@@ -52,6 +52,7 @@ PreparedStatement pstmt = null;
 		if(conn != null)
 			try{conn.close();}catch(SQLException sqle){}
 	}
+		//테스트
 	%>
 	<form method = "post" action ="index.jsp">
 		<input type = "submit" value = "되돌아가기">
