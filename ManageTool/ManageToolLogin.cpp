@@ -25,10 +25,10 @@ void CManageToolLogin::MakeConn(){
 	SQLAllocStmt(hdbc1, &hstmt1);		// 실제 문장 Handle 획득
 }
 
-BOOL CManageToolLogin::isExist(CString ID, CString Pwd){
-	int ID_result = 0, save = 0;
-	SQLINTEGER save2 = 0;
-	BOOL isExistID = 0, isExistPwd = 0;
+int CManageToolLogin::isExist(CString ID, CString Pwd){
+	int ID_result = 0, i  = 0, user_i;
+	SQLINTEGER save, save2 = 0;
+	BOOL isExistID = 0, isExistPwd = 0, isAdmin = 0;
 
 	int strLen = Pwd.GetLength();		// CString 타입 변수의 문자열 길이 알아내기
 
@@ -36,6 +36,9 @@ BOOL CManageToolLogin::isExist(CString ID, CString Pwd){
 	char* pwd = (char*)calloc(strLen, sizeof(char));		// 동적할당 해주기 *주의* 아래에 주소 넣을떄 pwd다! &pwd 아니다!!!
 	//char* pwd = new char[strLen];
 	char PWD_result[20];
+	int user[100];
+
+	SQLWCHAR* admin_query = (SQLWCHAR*)TEXT("select m_id from member where m_admin = 1;");
 
 	SQLWCHAR* id_query = (SQLWCHAR*)TEXT("select m_id from member where m_id = ?;");	
 	int id = _wtoi(ID);
@@ -49,6 +52,25 @@ BOOL CManageToolLogin::isExist(CString ID, CString Pwd){
 	WideCharToMultiByte(CP_ACP, 0, Pwd, -1, pwd, strLen + 1, NULL, NULL);
 	
 	SQLINTEGER ret = SQL_NTS;
+
+
+	/********* 여기서부터가 관리자 여부 조회 과정임 *********/
+	if ((retcode = SQLPrepare(hstmt1, admin_query/*보낼 SQL 문자열*/, SQL_NTS)) != SQL_SUCCESS)
+		AfxMessageBox(Errmsg);
+	if (retcode == SQL_SUCCESS)
+	{
+		retcode = SQLBindCol(hstmt1, 1, SQL_C_SLONG, &user_i, sizeof(user_i), &save);	// 결과물의 첫 Column을 저장.
+	}
+	SQLExecute(hstmt1);
+	while ((retcode = SQLFetch(hstmt1)) == SQL_SUCCESS){
+		user[i++] = user_i;
+	}		
+
+	for (i = 0; i < sizeof(user); i++){
+		if (id == user[i])
+			isAdmin = TRUE;
+	}
+	/********* 여기서까지가 관리자 여부 조회 과정임 *********/
 
 
 	/********* 여기서부터가 비밀번호 조회 과정임 *********/
@@ -84,7 +106,7 @@ BOOL CManageToolLogin::isExist(CString ID, CString Pwd){
 	}
 	if (retcode == SQL_SUCCESS)
 	{
-		retcode = SQLBindCol(hstmt1, 1, SQL_C_SLONG, &ID_result, sizeof(ID_result), (SQLINTEGER *)&save);	// 결과물의 첫 Column을 저장.
+		retcode = SQLBindCol(hstmt1, 1, SQL_C_SLONG, &ID_result, sizeof(ID_result), &save);	// 결과물의 첫 Column을 저장.
 	}
 
 	SQLExecute(hstmt1);
@@ -99,11 +121,18 @@ BOOL CManageToolLogin::isExist(CString ID, CString Pwd){
 	SQLFreeConnect(hdbc1);
 	SQLFreeEnv(henv);
 
-	if ((isExistID == TRUE) && (isExistPwd == TRUE)){
-		return TRUE;					// 일치하는 계정 찾아냄!
+	if ((isExistID == TRUE) && (isExistPwd == TRUE) && (isAdmin == TRUE)){
+		AfxMessageBox(_T("환영합니다!"));
+		return TRUE;				// 일치하는 계정 찾음!
 	}
-	else
-		return FALSE;					// 일치하는 계정 찾지 못함!
+	else if ((isExistID == TRUE) && (isExistPwd == TRUE) && (isAdmin != TRUE)){
+		AfxMessageBox(_T("관리자 계정이 아닙니다!"));
+		return 0;					// 관리자 계정이 아님!
+	}
+	else{
+		AfxMessageBox(_T("계정이 존재하지 않거나, 비밀번호를 잘못 입력하셨습니다!"));
+		return 0;					// 계정 자체가 없음!
+	}
 }
 
 /**********************

@@ -15,4 +15,3 @@ CManageToolODBC::CManageToolODBC()
 CManageToolODBC::~CManageToolODBC()
 {
 }
-

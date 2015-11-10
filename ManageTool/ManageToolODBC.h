@@ -10,7 +10,7 @@ class CManageToolODBC
 public:
 	SQLHENV		henv;		// 이벤트 핸들러
 	SQLHDBC		hdbc1;      // 접속 핸들러
-	SQLHSTMT	hstmt1;		// 접속 결과저장 변수
+	SQLHSTMT	hstmt1;	// 접속 결과저장 변수
 	SQLRETURN	retcode;	// SQL문 수행 결과.
 
 public:

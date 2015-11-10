@@ -1,10 +1,11 @@
 
-// ManageToolDlg.cpp : 구현 파일
+/	/ ManageToolDlg.cpp : 구현 파일
 //
 
 #include "stdafx.h"
 #include "ManageTool.h"
 #include "ManageToolDlg.h"
+#include "ManageToolMain.h"
 #include "afxdialogex.h"
 
 #ifdef _DEBUG
@@ -67,6 +68,7 @@ BEGIN_MESSAGE_MAP(CManageToolDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(IDC_BUTTON1, &CManageToolDlg::OnBnClickedButton1)
+	ON_BN_CLICKED(IDC_BUTTON2, &CManageToolDlg::OnBnClickedButton2)
 END_MESSAGE_MAP()
 
 
@@ -165,11 +167,24 @@ void CManageToolDlg::OnBnClickedButton1()
 
 	// 이렇게 하면 객체 포인터의 위치를 벗어나버려 에러가 발생한다!
 	*/
+	//CManageToolLogin::isExist(m_strID, m_strPwd);			//static 함수도 아니고 바로 호출하면 안됨! 실제 인스턴스를 만들고 거기서 호출을 해야!
+
+
 	message.Format(_T("학번(교번)과 비밀번호가 일치하지 않거나 잘못된 입력되었습니다. 다시 입력해 주십시오."));
 	CManageToolLogin login;
 	login.MakeConn();
-	if (!login.isExist(m_strID, m_strPwd)){
-		AfxMessageBox(message);
+	if (login.isExist(m_strID, m_strPwd) == TRUE){
+		CManageToolMain Main;
+		Main.DoModal();
 	}
-	//CManageToolLogin::isExist(m_strID, m_strPwd);			//static 함수도 아니고 바로 호출하면 안됨! 실제 인스턴스를 만들고 거기서 호출을 해야!
+	m_strID.Format(_T(""));
+	m_strPwd.Format(_T(""));
+	UpdateData(false);
+}
+
+
+void CManageToolDlg::OnBnClickedButton2()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	::SendMessage(this->m_hWnd, WM_CLOSE, NULL, NULL);
 }

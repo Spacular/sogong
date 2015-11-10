@@ -35,5 +35,7 @@ public:
 	// 비밀번호
 	CString m_strPwd;
 	CString message = _T("");
+
 	afx_msg void OnBnClickedButton1();
+	afx_msg void OnBnClickedButton2();
 };
