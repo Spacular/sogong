@@ -1,14 +1,19 @@
 #pragma once
 #include "atltypes.h"
 #include "ManageToolODBC.h"
+#include <iostream>
+#include <fstream>
+#include <cstdlib>
+#include "afxwin.h"
+#include <atlimage.h>
 
 typedef struct StuInfo {
 	int m_id;
 	char m_name[10];
 	char m_department[20];
+	//string m_department;
 	char m_gen[5];
 	DATE_STRUCT m_birthdate;
-	char picture[2000];
 }StuInfo;
 
 // CManageToolMain 대화 상자입니다.
@@ -40,6 +45,9 @@ public:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	void MakeConn();			// CManageToolODBC 클래스의 가상함수를 상속받아 정의.
+	StuInfo initValue(StuInfo info);
+
+public:
 	StuInfo WhoIs(int Loc);
 	// 해당 학생의 ID
 	CString m_name;
@@ -49,4 +57,8 @@ public:
 	CString m_dept;
 	// 해당 학생의 생일
 	CString m_birth;
+
+	// 사진 파일의 저장용 이름
+	char filename[11];
+	int m_Status;
 };
