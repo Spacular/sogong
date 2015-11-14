@@ -1,8 +1,8 @@
 
 // ManageToolDlg.h : 헤더 파일
+//
 
 #pragma once
-#include "ManageToolLogin.h"
 
 
 // CManageToolDlg 대화 상자
@@ -13,7 +13,9 @@ public:
 	CManageToolDlg(CWnd* pParent = NULL);	// 표준 생성자입니다.
 
 // 대화 상자 데이터입니다.
+#ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_MANAGETOOL_DIALOG };
+#endif
 
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV 지원입니다.
@@ -30,12 +32,11 @@ protected:
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
 public:
-	// 로그온 아이디
+	// 교번을 입력받는 곳
 	CString m_strID;
-	// 비밀번호
+	// 비밀번호를 입력받는 곳
 	CString m_strPwd;
-	CString message = _T("");
 
-	afx_msg void OnBnClickedButton1();
-	afx_msg void OnBnClickedButton2();
+	int result;			// Login 클래스의 isExist 함수를 실행하고 반환받은 결과값을 저장할 변수.
+	afx_msg void OnBnClickedLogin();
 };

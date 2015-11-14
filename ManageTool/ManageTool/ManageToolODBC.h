@@ -7,17 +7,17 @@
 
 class CManageToolODBC
 {
-public:
+protected:
 	SQLHENV		henv;		// 이벤트 핸들러
 	SQLHDBC		hdbc1;      // 접속 핸들러
-	SQLHSTMT	hstmt1;	// 접속 결과저장 변수
+	SQLHSTMT	hstmt1;		// 접속 결과저장 변수
 	SQLRETURN	retcode;	// SQL문 수행 결과.
 
 public:
 	CManageToolODBC();
 	~CManageToolODBC();
-	
-public:
+
+protected:
 	// 가상 함수 구현부입니다.
 	virtual void MakeConn() = 0;		// 하위클래스에서 연결을 정의하는 용도로 사용할 함수.
 };

@@ -1,12 +1,13 @@
 
-/	/ ManageToolDlg.cpp : 구현 파일
+// ManageToolDlg.cpp : 구현 파일
 //
 
 #include "stdafx.h"
 #include "ManageTool.h"
 #include "ManageToolDlg.h"
-#include "ManageToolMain.h"
 #include "afxdialogex.h"
+#include "ManageToolLogin.h"
+#include "ManageToolMain.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -21,7 +22,9 @@ public:
 	CAboutDlg();
 
 // 대화 상자 데이터입니다.
+#ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_ABOUTBOX };
+#endif
 
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 지원입니다.
@@ -31,7 +34,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 };
 
-CAboutDlg::CAboutDlg() : CDialogEx(CAboutDlg::IDD)
+CAboutDlg::CAboutDlg() : CDialogEx(IDD_ABOUTBOX)
 {
 }
 
@@ -49,7 +52,7 @@ END_MESSAGE_MAP()
 
 
 CManageToolDlg::CManageToolDlg(CWnd* pParent /*=NULL*/)
-	: CDialogEx(CManageToolDlg::IDD, pParent)
+	: CDialogEx(IDD_MANAGETOOL_DIALOG, pParent)
 	, m_strID(_T(""))
 	, m_strPwd(_T(""))
 {
@@ -67,8 +70,7 @@ BEGIN_MESSAGE_MAP(CManageToolDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
-	ON_BN_CLICKED(IDC_BUTTON1, &CManageToolDlg::OnBnClickedButton1)
-	ON_BN_CLICKED(IDC_BUTTON2, &CManageToolDlg::OnBnClickedButton2)
+	ON_BN_CLICKED(ID_Login, &CManageToolDlg::OnBnClickedLogin)
 END_MESSAGE_MAP()
 
 
@@ -142,7 +144,7 @@ void CManageToolDlg::OnPaint()
 		int y = (rect.Height() - cyIcon + 1) / 2;
 
 		// 아이콘을 그립니다.
-		//dc.DrawIcon(x, y, m_hIcon);
+		dc.DrawIcon(x, y, m_hIcon);
 	}
 	else
 	{
@@ -157,34 +159,33 @@ HCURSOR CManageToolDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
-void CManageToolDlg::OnBnClickedButton1()
+void CManageToolDlg::OnBnClickedLogin()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	UpdateData();	// 입력한 값들 저장.
-	/*
-	CManageToolLogin* pt = NULL;
-	pt->isExist(m_strID, m_strPwd);
+	UpdateData();	// 입력한 값들을 연결된 변수에 저장함
 
-	// 이렇게 하면 객체 포인터의 위치를 벗어나버려 에러가 발생한다!
-	*/
-	//CManageToolLogin::isExist(m_strID, m_strPwd);			//static 함수도 아니고 바로 호출하면 안됨! 실제 인스턴스를 만들고 거기서 호출을 해야!
+	if(m_strID == "")
+		AfxMessageBox(_T("교번을 입력하세요!"));
+	else if(m_strPwd == "")
+		AfxMessageBox(_T("비밀번호를 입력하세요!"));
+	else {
+		CManageToolLogin login;
+		login.MakeConn();
+		if ((result = (login.isExist(m_strID, m_strPwd))) == TRUE) {
+			AfxMessageBox(_T("환영합니다!"));
+			CManageToolMain Main;
+			Main.DoModal();
+		}
+		else if (result == 0) {
+			AfxMessageBox(_T("관리자 계정이 아닙니다!"));
+		}
+		else if (result == -1) {
+			AfxMessageBox(_T("계정이 존재하지 않거나, 비밀번호를 잘못 입력하셨습니다!"));
+		}
 
+		m_strID.Format(_T(""));
+		m_strPwd.Format(_T(""));
 
-	message.Format(_T("학번(교번)과 비밀번호가 일치하지 않거나 잘못된 입력되었습니다. 다시 입력해 주십시오."));
-	CManageToolLogin login;
-	login.MakeConn();
-	if (login.isExist(m_strID, m_strPwd) == TRUE){
-		CManageToolMain Main;
-		Main.DoModal();
+		UpdateData(false);
 	}
-	m_strID.Format(_T(""));
-	m_strPwd.Format(_T(""));
-	UpdateData(false);
-}
-
-
-void CManageToolDlg::OnBnClickedButton2()
-{
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	::SendMessage(this->m_hWnd, WM_CLOSE, NULL, NULL);
 }
