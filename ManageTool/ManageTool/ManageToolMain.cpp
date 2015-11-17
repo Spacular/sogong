@@ -143,6 +143,8 @@ StuInfo CManageToolMain::WhoIs(int Loc) {
 
 		for (int i = 0; i < Pic_size; i++)
 			output << m_picture[i];
+
+		free(m_picture);                         // 모든 데이터 수신완료 했으므로, 동적할당 해제.
 	}
 
 	SQLFreeStmt(hstmt1, SQL_DROP);
