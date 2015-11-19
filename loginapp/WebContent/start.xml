@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MOML version="1.0.0">
+    <UILAYOUT portrait="320,460">
+        <LABEL  layout="0,200,320,30"  text="Hello  MOML!"  textAlign="center"
+            fontColor="#00ff00" fontSize="20" defaultImg="#ffffff"/>
+    </UILAYOUT>
+</MOML>

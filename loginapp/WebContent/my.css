@@ -1,0 +1,60 @@
+.frame{
+    position: absolute;
+    /*border: 1px solid red;*/
+    width: 100%;
+    height: 100%;
+}
+
+.box{
+    position: relative;
+    /*border: 2px solid orange;*/
+    /*background-color: #FAED7D;*/
+    width: 400px;
+    height: 230px;
+    left: 35%;
+    top: 30%;
+}
+
+.logo{    
+	background-image: url("http://www.yu.ac.kr/_korean/_image/yu_logo.gif");/*http://www.yu.ac.kr/_korean/_image/yu_logo.gif*/
+    /*background-repeat: repeat-x;*/
+    background-repeat: no-repeat;
+    /*border: 1px solid red;*/
+    width: 100%;
+    height: 55px;
+}
+
+.box table {
+    margin-top: 5em;
+    padding: 3em;
+    margin-left: auto;
+    margin-right: auto;
+    border: 2.5px solid #FDBF3B;
+    background-color: #FFEBC1;
+}
+
+.box tr{
+	font-family: "Malgun", sans-serif;
+}
+
+.background {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	margin-top: 5%;
+	background-color: #FFFF7E;
+}
+
+.copyright{
+	position: absolute;
+	width: 100%;
+	height: auto;
+	margin-top: 60%;
+	text-align: center;	
+}
+
+.td{
+	border: 1.5px solid black;
+	width: 80px;
+	height: 48px;
+}
