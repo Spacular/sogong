@@ -1,0 +1,41 @@
+
+
+MessageBox(hWnd,"내용","창 이름",MB_OKCANCEL)
+=> MessageBox(hWnd,"확인","수정하시겠습니까?",MB_OKCANCEL)
+
+
+if(출석 버튼 클릭시)
+{
+	{
+		if(MessageBox(hWnd,"확인","수정하시겠습니까?",MB_OKCANCEL) == IDOK)
+		   {
+			// update 쿼리문을 전송하는 함수 호출
+			// m_attendance를 1으로 변경
+		   }
+		else	{;}
+	}
+}
+
+else if(지각 버튼 클릭시)
+{
+	{
+		if(MessageBox(hWnd,"확인","수정하시겠습니까?",MB_OKCANCEL) == IDOK)
+		   {
+			// update 쿼리문을 전송하는 함수 호출
+			// m_attendance를 0으로 변경
+		   }
+		else	{;}
+	}
+}
+
+else if(결석 버튼 클릭시)
+{
+	{
+		if(MessageBox(hWnd,"확인","수정하시겠습니까?",MB_OKCANCEL) == IDOK)
+		   {
+			// update 쿼리문을 전송하는 함수 호출
+			// m_attendance를 -1으로 변경
+		   }
+		else	{;}
+	}
+}
