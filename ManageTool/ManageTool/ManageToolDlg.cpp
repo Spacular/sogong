@@ -173,8 +173,14 @@ void CManageToolDlg::OnBnClickedLogin()
 		login.MakeConn();
 		if ((result = (login.isExist(m_strID, m_strPwd))) == TRUE) {
 			AfxMessageBox(_T("환영합니다!"));
+
+			m_strID.Format(_T(""));
+			m_strPwd.Format(_T(""));
+			UpdateData(false);				// 입력정보 초기화
+
 			CManageToolMain Main;
 			Main.DoModal();
+			//::SendMessage(this->m_hWnd, WM_CLOSE, NULL, NULL);	// 종료시.
 		}
 		else if (result == 0) {
 			AfxMessageBox(_T("관리자 계정이 아닙니다!"));
@@ -182,10 +188,6 @@ void CManageToolDlg::OnBnClickedLogin()
 		else if (result == -1) {
 			AfxMessageBox(_T("계정이 존재하지 않거나, 비밀번호를 잘못 입력하셨습니다!"));
 		}
-
-		m_strID.Format(_T(""));
-		m_strPwd.Format(_T(""));
-
-		UpdateData(false);
+		
 	}
 }

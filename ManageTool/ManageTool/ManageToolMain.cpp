@@ -46,7 +46,7 @@ void CManageToolMain::MakeConn() {
 		AfxMessageBox(Errmsg);
 	}
 
-	if ((retcode = SQLConnect(hdbc1, (SQLWCHAR *)TEXT("manage"/*DSN이름*/), SQL_NTS/*NULL문자 대신*/, (SQLWCHAR *)TEXT("root"/*접속계정*/), SQL_NTS, (SQLWCHAR *)TEXT("542133tlatms"/*비밀번호*/), SQL_NTS)) != SQL_SUCCESS) {
+	if ((retcode = SQLConnect(hdbc1, (SQLWCHAR *)TEXT("member"/*DSN이름*/), SQL_NTS/*NULL문자 대신*/, (SQLWCHAR *)TEXT("root"/*접속계정*/), SQL_NTS, (SQLWCHAR *)TEXT("542133tlatms"/*비밀번호*/), SQL_NTS)) != SQL_SUCCESS) {
 		Errmsg.Format(_T("에러발생! 에러코드: %d"), retcode);
 		AfxMessageBox(Errmsg);
 	}
@@ -54,6 +54,28 @@ void CManageToolMain::MakeConn() {
 	SQLAllocStmt(hdbc1, &hstmt1);		// 실제 문장 Handle 획득
 }
 
+void CManageToolMain::Scan(int* result) {
+	int save;
+
+	SQLWCHAR* query = (SQLWCHAR*)TEXT("select s_location from seat where s_check = 'x';");
+	if ((retcode = SQLPrepare(hstmt1, /*보낼 SQL 문자열*/query, SQL_NTS)) != SQL_SUCCESS) {
+		Errmsg.Format(_T("에러발생! 에러코드: %d"), retcode);
+		AfxMessageBox(Errmsg);
+	}
+
+	retcode = SQLExecute(hstmt1);
+
+	if (retcode == SQL_SUCCESS)
+	{
+		count = 0;
+		retcode = SQLBindCol(hstmt1, 1, SQL_C_SLONG, (result+(count)), sizeof(result), (SQLINTEGER *)&save);	// 결과물의 첫 번째 Column을 저장.
+	}
+	while (SQLFetch(hstmt1) == SQL_SUCCESS) {
+		count++;
+		retcode = SQLBindCol(hstmt1, 1, SQL_C_SLONG, (result + (count)), sizeof(result), (SQLINTEGER *)&save);	// 결과물의 첫 번째 Column을 저장.
+	}
+
+}
 
 StuInfo CManageToolMain::WhoIs(int Loc) {
 	StuInfo stuinfo;										// 구조체 초기화
@@ -68,12 +90,12 @@ StuInfo CManageToolMain::WhoIs(int Loc) {
 	/* 초기화는 함수를 통해서 하지말고 직접 해줘야 되네...*/
 
 
-	int save0, save1, save2, save3, save4, save5, save6, pos, Pic_size = 0;
+	int save0, save1, save2, save3, save4, save5, save6, save7, pos, Pic_size = 0;
 
 	pos = Loc - 1;
 
 	SQLWCHAR* pic_size_query = (SQLWCHAR*)TEXT("select octet_length(m_picture) from member as m inner join seat as s on m.m_id = s.m_id and s_location = ?;");
-	SQLWCHAR* query = (SQLWCHAR*)TEXT("select m.m_id, m_name, m_department, m_gen, m_birthdate, m_picture from member as m inner join seat as s on m.m_id = s.m_id and s_location = ?;");
+	SQLWCHAR* query = (SQLWCHAR*)TEXT("select m.m_id, m_name, m_department, m_gen, m_birthdate, m_picture, m_attendance from member as m inner join seat as s on m.m_id = s.m_id and s_location = ?;");
 
 	/********** BLOC data 크기 알아내는 부분	********/
 	if ((retcode = SQLPrepare(hstmt1, /*보낼 SQL 문자열*/pic_size_query, SQL_NTS)) != SQL_SUCCESS) {
@@ -129,6 +151,7 @@ StuInfo CManageToolMain::WhoIs(int Loc) {
 		retcode = SQLBindCol(hstmt1, 5, SQL_C_DATE, &stuinfo.m_birthdate, sizeof(stuinfo.m_birthdate) + 10, (SQLINTEGER *)&save5);	// 결과물의 다섯번째 Column을 저장.
 		if (Pic_size != 0)
 			retcode = SQLBindCol(hstmt1, 6, SQL_C_BINARY, m_picture, Pic_size, (SQLINTEGER *)&save6);	// 결과물의 여섯번째 Column을 저장.
+		retcode = SQLBindCol(hstmt1, 7, SQL_C_SLONG, &stuinfo.m_attendance, sizeof(stuinfo.m_attendance), (SQLINTEGER *)&save7);	// 결과물의 일곱번째 Column을 저장.
 	}
 	while (SQLFetch(hstmt1) == SQL_SUCCESS);
 
@@ -144,7 +167,7 @@ StuInfo CManageToolMain::WhoIs(int Loc) {
 		for (int i = 0; i < Pic_size; i++)
 			output << m_picture[i];
 
-		free(m_picture);                         // 모든 데이터 수신완료 했으므로, 동적할당 해제.
+		free(m_picture);                         // 모든 이미지 데이터를 수신완료 했으므로, 동적할당 해제.
 	}
 
 	SQLFreeStmt(hstmt1, SQL_DROP);
@@ -172,14 +195,23 @@ void CManageToolMain::OnPaint()
 	int Interval_x = (int)(Interval_y * 1.78);
 	int nRows = 10;		// 행(Row)의 수(Number).
 	int nCols = 10;		// 열(Column)의 수.
+	
 
 	POINT Selected_Seat;		// 마우스로 선택한 좌석의 좌표
 	Selected_Seat.x = 0;	Selected_Seat.y = 0;
 
 	CRgn classroom[10][10];
 	CRect desk[10][10];
+
 	CString strData = _T("");
 	//strData.Format(_T("X:%03d, Y:%03d"), m_lbdown.x, m_lbdown.y);
+
+	if (isFirst)
+	{
+		this->MakeConn();
+		Scan(result);
+		isFirst = FALSE;
+	}
 
 	for (int i = 0; i < nRows; i++) {
 		for (int j = 0; j < nCols; j++) {
@@ -193,7 +225,13 @@ void CManageToolMain::OnPaint()
 		Pos_x = Init_x;
 		Pos_y += Interval_y;
 	}
-
+	
+	for (int i = 0; i < count; i++) {
+		int row = result[i] / 10;
+		int column = result[i] % 10;
+		dc.FillSolidRect(&desk[row][column], RGB(0, 0, 0));
+	}
+	
 	if (m_lbdown != m_Oldlbdown) {
 		BOOL result = 0;
 		CString num, birth;
@@ -217,6 +255,7 @@ void CManageToolMain::OnPaint()
 
 					this->MakeConn();				// 이 클래스의 연결 획득!
 					info = WhoIs(Loc);
+					isFirst = FALSE;				// 다시 한번 좌석 현황 스캔하도록
 
 					//CString strImagePath;
 					//strImagePath.Format(_T("%s"), filename);

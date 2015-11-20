@@ -13,6 +13,7 @@ typedef struct StuInfo {
 	char m_department[20];
 	//string m_department;
 	char m_gen[5];
+	int m_attendance;
 	DATE_STRUCT m_birthdate;
 }StuInfo;
 
@@ -58,11 +59,16 @@ public:
 	StuInfo WhoIs(int Loc);
 	// 선택한 학생의 이름
 	void MakeConn();
+	void Scan(int* result);
 
 private:
 	CString m_name;
 	// 선택한 학생의 ID
 	CString m_ID;
+	bool isFirst = TRUE;
+	int location[100] = {};
+	int count;						// s_chech를 확인하여 착석한 좌석의 갯수를 나타냄. First()함수에서 사용.
+	int result[100];		// 착석한 결과. 최대 100명을 수용할 수 있어야 하므로.
 public:
 	// 반환받은 학과 정보
 	CString m_dept;
