@@ -14,8 +14,15 @@ typedef struct StuInfo {
 	//string m_department;
 	char m_gen[5];
 	int m_attendance;
+	CHAR m_qcontent[200];		// 질문은 최대 200자까지;
 	DATE_STRUCT m_birthdate;
 }StuInfo;
+
+typedef struct attendance {
+	int s_location;
+	int m_warning;
+	int m_question;
+}attendance;
 
 class CManageToolMain : public CDialogEx, public CManageToolODBC
 {
@@ -28,6 +35,8 @@ public:
 		, m_dept(_T(""))
 		, m_gen(_T(""))
 		, m_birth(_T(""))
+		, m_qcontent(_T(""))
+		, m_radio(0)
 	{
 
 	}   // 표준 생성자입니다.
@@ -59,7 +68,7 @@ public:
 	StuInfo WhoIs(int Loc);
 	// 선택한 학생의 이름
 	void MakeConn();
-	void Scan(int* result);
+	void Scan(attendance* result);
 
 private:
 	CString m_name;
@@ -68,7 +77,7 @@ private:
 	bool isFirst = TRUE;
 	int location[100] = {};
 	int count;						// s_chech를 확인하여 착석한 좌석의 갯수를 나타냄. First()함수에서 사용.
-	int result[100];		// 착석한 결과. 최대 100명을 수용할 수 있어야 하므로.
+	attendance result[100];		// 착석한 결과. 최대 100명을 수용할 수 있어야 하므로.
 public:
 	// 반환받은 학과 정보
 	CString m_dept;
@@ -78,4 +87,14 @@ public:
 	CString m_birth;
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	CString m_qcontent;			// 질문 에딧 컨트롤에 연결된 변수
+	int m_radio;				// 라디오 버튼과 연결된 변수임
+	BOOL PreTranslateMessage(MSG* pMsg);
+	void SetProfileImage(CString str);
+		// Picture Control과 연결된 변수
+	CStatic m_profileImage;
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
+//	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+	afx_msg void OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized);
+	CString str_loc;			// 저장된 사진 파일의 경로
 };

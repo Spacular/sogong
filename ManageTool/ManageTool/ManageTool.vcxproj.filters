@@ -42,6 +42,9 @@
     <ClInclude Include="ManageToolMain.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="UTF8Conv.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ManageTool.cpp">

@@ -2,6 +2,8 @@
 #include "ManageTool.h"
 #include "ManageToolMain.h"
 #include "afxdialogex.h"
+#include "afxconv.h"
+#include "UTF8Conv.h"
 using namespace std;
 
 
@@ -21,6 +23,8 @@ void CManageToolMain::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_EDIT3, m_dept);
 	DDX_Text(pDX, IDC_EDIT4, m_gen);
 	DDX_Text(pDX, IDC_EDIT5, m_birth);
+	DDX_Text(pDX, IDC_EDIT6, m_qcontent);
+	DDX_Control(pDX, IDC_PICTURE, m_profileImage);
 }
 
 
@@ -29,6 +33,9 @@ BEGIN_MESSAGE_MAP(CManageToolMain, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_MOUSEMOVE()
 	ON_WM_LBUTTONDOWN()
+	ON_WM_TIMER()
+//	ON_WM_ERASEBKGND()
+ON_WM_ACTIVATE()
 END_MESSAGE_MAP()
 
 
@@ -54,10 +61,16 @@ void CManageToolMain::MakeConn() {
 	SQLAllocStmt(hdbc1, &hstmt1);		// 실제 문장 Handle 획득
 }
 
-void CManageToolMain::Scan(int* result) {
+void CManageToolMain::Scan(attendance* result) {
 	int save;
 
-	SQLWCHAR* query = (SQLWCHAR*)TEXT("select s_location from seat where s_check = 'x';");
+	SQLWCHAR* query = (SQLWCHAR*)TEXT("select s_location, m_warning, m_question from member as m inner join seat as s on m.m_id = s.m_id where s_check = 'x';");
+	/*
+	select s_location, m_warning, m_question
+	from member as m inner join seat as s
+	on m.m_id = s.m_id
+	where s_check = 'x';
+	*/
 	if ((retcode = SQLPrepare(hstmt1, /*보낼 SQL 문자열*/query, SQL_NTS)) != SQL_SUCCESS) {
 		Errmsg.Format(_T("에러발생! 에러코드: %d"), retcode);
 		AfxMessageBox(Errmsg);
@@ -68,13 +81,21 @@ void CManageToolMain::Scan(int* result) {
 	if (retcode == SQL_SUCCESS)
 	{
 		count = 0;
-		retcode = SQLBindCol(hstmt1, 1, SQL_C_SLONG, (result+(count)), sizeof(result), (SQLINTEGER *)&save);	// 결과물의 첫 번째 Column을 저장.
+		retcode = SQLBindCol(hstmt1, 1, SQL_C_SLONG, &(result + (count))->s_location, sizeof(result), (SQLINTEGER *)&save);	// 결과물의 첫 번째 Column을 저장.
+		retcode = SQLBindCol(hstmt1, 2, SQL_C_SLONG, &(result + (count))->m_warning, sizeof(result), (SQLINTEGER *)&save);	// 결과물의 두 번째 Column을 저장.
+		retcode = SQLBindCol(hstmt1, 3, SQL_C_SLONG, &(result + (count))->m_question, sizeof(result), (SQLINTEGER *)&save);	// 결과물의 세 번째 Column을 저장.
 	}
 	while (SQLFetch(hstmt1) == SQL_SUCCESS) {
 		count++;
-		retcode = SQLBindCol(hstmt1, 1, SQL_C_SLONG, (result + (count)), sizeof(result), (SQLINTEGER *)&save);	// 결과물의 첫 번째 Column을 저장.
+		retcode = SQLBindCol(hstmt1, 1, SQL_C_SLONG, &(result + (count))->s_location, sizeof(result), (SQLINTEGER *)&save);	// 결과물의 첫 번째 Column을 저장.
+		retcode = SQLBindCol(hstmt1, 2, SQL_C_SLONG, &(result + (count))->m_warning, sizeof(result), (SQLINTEGER *)&save);	// 결과물의 두 번째 Column을 저장.
+		retcode = SQLBindCol(hstmt1, 3, SQL_C_SLONG, &(result + (count))->m_question, sizeof(result), (SQLINTEGER *)&save);	// 결과물의 세 번째 Column을 저장.
 	}
 
+	SQLFreeStmt(hstmt1, SQL_DROP);
+	SQLDisconnect(hdbc1);
+	SQLFreeConnect(hdbc1);
+	SQLFreeEnv(henv);
 }
 
 StuInfo CManageToolMain::WhoIs(int Loc) {
@@ -87,15 +108,15 @@ StuInfo CManageToolMain::WhoIs(int Loc) {
 	strcpy_s(stuinfo.m_department, sizeof("정보없음"), "정보없음");
 	strcpy_s(stuinfo.m_gen, sizeof("정보없음"), "정보없음");
 	strcpy_s(stuinfo.m_name, sizeof("정보없음"), "정보없음");
-	/* 초기화는 함수를 통해서 하지말고 직접 해줘야 되네...*/
-
+	//_tcscpy_s(stuinfo.m_qcontent, _countof(stuinfo.m_qcontent), _T(""));	// TCHAR 타입에 문자열 복사하는 방법 
+	//_stprintf_s(szNewName, _countof(szNewName), _T("나는 %s 입니다."), szName);	 // TCHAR 타입에 문자열 넣을때 사용하는 방법.
 
 	int save0, save1, save2, save3, save4, save5, save6, save7, pos, Pic_size = 0;
 
 	pos = Loc - 1;
 
 	SQLWCHAR* pic_size_query = (SQLWCHAR*)TEXT("select octet_length(m_picture) from member as m inner join seat as s on m.m_id = s.m_id and s_location = ?;");
-	SQLWCHAR* query = (SQLWCHAR*)TEXT("select m.m_id, m_name, m_department, m_gen, m_birthdate, m_picture, m_attendance from member as m inner join seat as s on m.m_id = s.m_id and s_location = ?;");
+	SQLWCHAR* query = (SQLWCHAR*)TEXT("select m.m_id, m_name, m_department, m_gen, m_birthdate, m_picture, m_qcontent from member as m inner join seat as s on m.m_id = s.m_id and s_location = ?;");
 
 	/********** BLOC data 크기 알아내는 부분	********/
 	if ((retcode = SQLPrepare(hstmt1, /*보낼 SQL 문자열*/pic_size_query, SQL_NTS)) != SQL_SUCCESS) {
@@ -151,16 +172,17 @@ StuInfo CManageToolMain::WhoIs(int Loc) {
 		retcode = SQLBindCol(hstmt1, 5, SQL_C_DATE, &stuinfo.m_birthdate, sizeof(stuinfo.m_birthdate) + 10, (SQLINTEGER *)&save5);	// 결과물의 다섯번째 Column을 저장.
 		if (Pic_size != 0)
 			retcode = SQLBindCol(hstmt1, 6, SQL_C_BINARY, m_picture, Pic_size, (SQLINTEGER *)&save6);	// 결과물의 여섯번째 Column을 저장.
-		retcode = SQLBindCol(hstmt1, 7, SQL_C_SLONG, &stuinfo.m_attendance, sizeof(stuinfo.m_attendance), (SQLINTEGER *)&save7);	// 결과물의 일곱번째 Column을 저장.
+		retcode = SQLBindCol(hstmt1, 7, SQL_CHAR, stuinfo.m_qcontent, sizeof(stuinfo.m_qcontent), (SQLINTEGER *)&save7);	// 결과물의 일곱번째 Column을 저장.
 	}
 	while (SQLFetch(hstmt1) == SQL_SUCCESS);
 
 	if (Pic_size != 0) {
-		strcpy_s(filename, "pic_");
+		CreateDirectory(_T("pic"), NULL);					// 폴더를 새로 만든다.
+		strcpy_s(filename, "pic/pic_");
 		ofstream output;
 		char num[8];
-		sprintf_s(num, sizeof(num), "%03d.jpg", pos);
-		strcpy_s(filename + 3, sizeof(num), num);
+		sprintf_s(num, sizeof(num), "%03d.jpg", pos + 1);
+		strcpy_s(filename + 8, sizeof(num), num);
 
 		output.open(filename, ios::binary);					// 'pic_좌석번호' 의 형식으로 저장
 
@@ -169,6 +191,11 @@ StuInfo CManageToolMain::WhoIs(int Loc) {
 
 		free(m_picture);                         // 모든 이미지 데이터를 수신완료 했으므로, 동적할당 해제.
 	}
+	
+	if (strcmp(stuinfo.m_qcontent, "") == 0)
+	{
+		strcpy_s(stuinfo.m_qcontent, sizeof("질문없음"), "질문없음");
+	}		
 
 	SQLFreeStmt(hstmt1, SQL_DROP);
 	SQLDisconnect(hdbc1);
@@ -198,19 +225,20 @@ void CManageToolMain::OnPaint()
 	
 
 	POINT Selected_Seat;		// 마우스로 선택한 좌석의 좌표
-	Selected_Seat.x = 0;	Selected_Seat.y = 0;
 
+	Selected_Seat.x = 0;	Selected_Seat.y = 0;
 	CRgn classroom[10][10];
 	CRect desk[10][10];
 
 	CString strData = _T("");
 	//strData.Format(_T("X:%03d, Y:%03d"), m_lbdown.x, m_lbdown.y);
-
+	
 	if (isFirst)
 	{
 		this->MakeConn();
 		Scan(result);
 		isFirst = FALSE;
+		SetTimer(1, 3000, NULL);		// 10초에 한 번 꼴로 확인!
 	}
 
 	for (int i = 0; i < nRows; i++) {
@@ -227,9 +255,23 @@ void CManageToolMain::OnPaint()
 	}
 	
 	for (int i = 0; i < count; i++) {
-		int row = result[i] / 10;
-		int column = result[i] % 10;
-		dc.FillSolidRect(&desk[row][column], RGB(0, 0, 0));
+		int row = result[i].s_location / 10;
+		int column = result[i].s_location % 10;
+		if(result[i].m_warning == 1)
+		{
+			// 의심학생은 빨간색으로
+			dc.FillSolidRect(&desk[row][column], RGB(255, 0, 0));
+		}
+		else if (result[i].m_question == 1)
+		{
+			// 질문 있는 학생은 노란색으로
+			dc.FillSolidRect(&desk[row][column], RGB(255, 255, 0));
+		}
+		else
+		{
+			// 그 외의 일반 출석은 검은색으로
+			dc.FillSolidRect(&desk[row][column], RGB(0, 0, 0));
+		}
 	}
 	
 	if (m_lbdown != m_Oldlbdown) {
@@ -239,10 +281,10 @@ void CManageToolMain::OnPaint()
 		num.Format(_T(""));	birth.Format(_T(""));				// 초기화!
 
 		StuInfo info;
+		
 
 		info.m_birthdate.day = NULL;	info.m_birthdate.day = NULL; info.m_birthdate.day = NULL;	info.m_id = NULL;
-		strcpy_s(info.m_department, "");	strcpy_s(info.m_gen, "");	strcpy_s(info.m_name, "");
-
+		strcpy_s(info.m_department, "");	strcpy_s(info.m_gen, "");	strcpy_s(info.m_name, "");	m_qcontent = "";
 		for (int i = 0; i < nRows; i++) {
 			for (int j = 0; j < nCols; j++) {
 				result = desk[i][j].PtInRect(m_lbdown);
@@ -257,17 +299,6 @@ void CManageToolMain::OnPaint()
 					info = WhoIs(Loc);
 					isFirst = FALSE;				// 다시 한번 좌석 현황 스캔하도록
 
-					//CString strImagePath;
-					//strImagePath.Format(_T("%s"), filename);
-
-					string  strImagePath;
-					strImagePath = filename;
-
-					/**********************************************************************************************************/
-					/*						주													의										 	     */
-					/* Picture Control에 뿌려주기 위해 CImage를 사용해야 하며 이것의 매개변수는 CString 타입이다!! 반드시 구현!!!   */
-					/**********************************************************************************************************/
-
 					m_name = info.m_name;
 
 					num.Format(_T("%d"), info.m_id);
@@ -277,7 +308,27 @@ void CManageToolMain::OnPaint()
 
 					birth.Format(_T("%d - %d - %d"), info.m_birthdate.year, info.m_birthdate.month, info.m_birthdate.day);
 					m_birth = birth;
+					
+					if (strcmp(info.m_gen, "m") == 0)
+					{
+						TCHAR *man = L"남자";
+						// 남자일 경우
+						m_gen.Format(_T("%s"), man);
+					}
+					else if (strcmp(info.m_gen, "f") == 0)
+					{
+						TCHAR *woman = L"여자";
+						// 여자일 경우
+						m_gen.Format(_T("%s"), woman);
+					}
 
+					m_qcontent = info.m_qcontent;
+
+					str_loc.Format(_T("%03d"), Loc);
+					SetProfileImage(str_loc);
+
+					m_radio = info.m_attendance;
+					
 					UpdateData(false);		// 값 갱신!
 				}
 			}
@@ -300,4 +351,82 @@ void CManageToolMain::OnLButtonDown(UINT nFlags, CPoint point)
 
 	m_lbdown = point;
 	RedrawWindow();
+}
+
+BOOL CManageToolMain::PreTranslateMessage(MSG* pMsg)
+{
+	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
+	if (pMsg->wParam == VK_RETURN || pMsg->wParam == VK_ESCAPE)   // 엔터나 ESC 종료 방지
+		return TRUE;
+
+	return __super::PreTranslateMessage(pMsg);
+}
+
+
+void CManageToolMain::SetProfileImage(CString str)
+{
+	CDC *dc = m_profileImage.GetWindowDC();
+	CImage m_jpg;   // jpg이미지
+	CString strImagePath = _T("pic/pic_") + str + _T(".jpg");
+	dc->SetStretchBltMode(COLORONCOLOR);
+
+	HRESULT hResult = m_jpg.Load(strImagePath);
+
+	if (!FAILED(hResult))
+	{
+		CRect rect;
+		m_profileImage.GetClientRect(rect);	
+		// m_jpg.BitBlt(dc->m_hDC, 0, 0);
+		m_jpg.StretchBlt(dc->m_hDC, 0, 0, rect.Width(), rect.Height(), SRCCOPY); // 픽쳐컨트롤 크기에 맞게 이미지 크기 조정
+	}
+	m_profileImage.ReleaseDC(dc);
+}
+
+void CManageToolMain::OnTimer(UINT_PTR nIDEvent)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	this->MakeConn();
+	Scan(this->result);
+
+	Invalidate(FALSE);
+	//RedrawWindow();
+	//__super::OnTimer(nIDEvent);
+
+	/*
+	CPaintDC dc(this);
+	CDC memdc;
+	memdc.CreateCompatibleDC(&dc);
+
+	CRect ClientRect;
+	GetClientRect(ClientRect);
+
+	CBitmap bitmap;
+	bitmap.CreateCompatibleBitmap(&dc, ClientRect.Width(), ClientRect.Height());
+	memdc.SelectObject(bitmap);
+
+	dc.BitBlt(0, 0, ClientRect.Width(), ClientRect.Height(), &memdc, 0, 0, SRCCOPY);
+	memdc.DeleteDC();
+	//membm.DeleteObject();
+	*/
+}
+
+
+//BOOL CManageToolMain::OnEraseBkgnd(CDC* pDC)
+//{
+//	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+//	return __super::OnEraseBkgnd(NULL);
+//	/*
+//	CRect rect;
+//	GetClientRect(&rect);
+//	COLORREF color = GetSysColor(COLOR_3DFACE);
+//	pDC->FillSolidRect(&rect, color);
+//	*/
+//}
+
+
+void CManageToolMain::OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized)
+{
+	//__super::OnActivate(nState, pWndOther, bMinimized);
+	SetProfileImage(str_loc);
+	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
 }

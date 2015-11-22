@@ -39,4 +39,5 @@ public:
 
 	int result;			// Login 클래스의 isExist 함수를 실행하고 반환받은 결과값을 저장할 변수.
 	afx_msg void OnBnClickedLogin();
+	afx_msg void OnBnClickedCancel();
 };

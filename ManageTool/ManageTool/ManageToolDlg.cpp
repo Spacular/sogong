@@ -3,6 +3,7 @@
 //
 
 #include "stdafx.h"
+#include "windows.h"
 #include "ManageTool.h"
 #include "ManageToolDlg.h"
 #include "afxdialogex.h"
@@ -71,6 +72,7 @@ BEGIN_MESSAGE_MAP(CManageToolDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(ID_Login, &CManageToolDlg::OnBnClickedLogin)
+	ON_BN_CLICKED(IDCANCEL, &CManageToolDlg::OnBnClickedCancel)
 END_MESSAGE_MAP()
 
 
@@ -190,4 +192,13 @@ void CManageToolDlg::OnBnClickedLogin()
 		}
 		
 	}
+}
+
+
+void CManageToolDlg::OnBnClickedCancel()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	//RemoveDirectory(_T("pic\\"));			// 디렉토리 지우는 함수. 내부가 비어있어야 지울수 있다!
+	KillTimer(1);
+	CDialogEx::OnCancel();
 }
