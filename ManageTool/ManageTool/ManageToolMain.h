@@ -13,9 +13,9 @@ typedef struct StuInfo {
 	char m_department[20];
 	//string m_department;
 	char m_gen[5];
+	DATE_STRUCT m_birthdate;
 	int m_attendance;
 	CHAR m_qcontent[200];		// 질문은 최대 200자까지;
-	DATE_STRUCT m_birthdate;
 }StuInfo;
 
 typedef struct attendance {
@@ -28,18 +28,8 @@ class CManageToolMain : public CDialogEx, public CManageToolODBC
 {
 	DECLARE_DYNAMIC(CManageToolMain)
 
-public:
-	CManageToolMain(CWnd* pParent = NULL)
-		: CDialogEx(IDD_MAINDLG, pParent)
-		, m_name(_T(""))
-		, m_dept(_T(""))
-		, m_gen(_T(""))
-		, m_birth(_T(""))
-		, m_qcontent(_T(""))
-		, m_radio(0)
-	{
-
-	}   // 표준 생성자입니다.
+public: 
+	explicit CManageToolMain(CWnd* pParent = NULL);   // 표준 생성자입니다.
 	virtual ~CManageToolMain();
 
 // 대화 상자 데이터입니다.
@@ -53,7 +43,6 @@ protected:
 
 public:
 	CString Errmsg = _T("");
-
 	// 사진 파일의 저장용 이름
 	char filename[11];
 	int m_Status;
@@ -69,7 +58,6 @@ public:
 	// 선택한 학생의 이름
 	void MakeConn();
 	void Scan(attendance* result);
-
 private:
 	CString m_name;
 	// 선택한 학생의 ID
@@ -78,6 +66,7 @@ private:
 	int location[100] = {};
 	int count;						// s_chech를 확인하여 착석한 좌석의 갯수를 나타냄. First()함수에서 사용.
 	attendance result[100];		// 착석한 결과. 최대 100명을 수용할 수 있어야 하므로.
+	void SetProfileImage(CString str);	// 프로필 이미지 세팅
 public:
 	// 반환받은 학과 정보
 	CString m_dept;
@@ -87,14 +76,21 @@ public:
 	CString m_birth;
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	
+	CStatic m_picture;
 	CString m_qcontent;			// 질문 에딧 컨트롤에 연결된 변수
-	int m_radio;				// 라디오 버튼과 연결된 변수임
-	BOOL PreTranslateMessage(MSG* pMsg);
-	void SetProfileImage(CString str);
-		// Picture Control과 연결된 변수
-	CStatic m_profileImage;
+	afx_msg void OnStnClickedEdit6();
+	int m_radio;
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
-//	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+	//	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized);
 	CString str_loc;			// 저장된 사진 파일의 경로
+	CStatic m_profileImage;
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	void SetSkin(CDC *pDC);
+	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+	afx_msg void OnEnChangeEdit7();
+	afx_msg void OnBnClickedRadio1();
+	afx_msg void OnBnClickedRadio2();
+	afx_msg void OnBnClickedRadio3();
 };

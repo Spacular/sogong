@@ -220,4 +220,4 @@ inline LPSTR WINAPI _W2AHelper(LPSTR lpa, LPCWSTR lpw, int nChars)
 #else
 #define T2UTF8_EX	A2UTF8_EX
 #define UTF82T_EX	UTF82A_EX
-#endif
+#endif#pragma once

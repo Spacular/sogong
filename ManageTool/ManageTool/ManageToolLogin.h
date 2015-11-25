@@ -13,5 +13,6 @@ public:
 public:
 	void MakeConn();
 	int isExist(CString ID, CString Pwd);		// ID와 Password가 존재하는지 확인하는 용도. 다른 곳에 공통적으로 확인할 수 있는 기능이라면 상위클래스의 가상함수로!
+	void SetSkin(CDC * pDC);
 };
 

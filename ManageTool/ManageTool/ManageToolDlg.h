@@ -1,7 +1,7 @@
 
 // ManageToolDlg.h : 헤더 파일
 //
-
+#include "ManageToolLogin.h"
 #pragma once
 
 
@@ -10,7 +10,7 @@ class CManageToolDlg : public CDialogEx
 {
 // 생성입니다.
 public:
-	CManageToolDlg(CWnd* pParent = NULL);	// 표준 생성자입니다.
+	explicit CManageToolDlg(CWnd* pParent = NULL);	// 표준 생성자입니다.
 
 // 대화 상자 데이터입니다.
 #ifdef AFX_DESIGN_TIME
@@ -36,6 +36,8 @@ public:
 	CString m_strID;
 	// 비밀번호를 입력받는 곳
 	CString m_strPwd;
+
+	CManageToolLogin login;
 
 	int result;			// Login 클래스의 isExist 함수를 실행하고 반환받은 결과값을 저장할 변수.
 	afx_msg void OnBnClickedLogin();

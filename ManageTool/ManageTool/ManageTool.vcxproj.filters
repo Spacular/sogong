@@ -42,6 +42,9 @@
     <ClInclude Include="ManageToolMain.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="ManageToolPic.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
     <ClInclude Include="UTF8Conv.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -78,6 +81,15 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\ManageTool.ico">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="res\로그인화면.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="res\교수님화면.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="res\bitmap2.bmp">
       <Filter>리소스 파일</Filter>
     </Image>
   </ItemGroup>
