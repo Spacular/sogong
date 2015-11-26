@@ -1,11 +1,10 @@
 <!doctype html>
-<%@ page language="java" contentType="text/html; charset=UTF-8"
+<%@page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
- <%@ page import = "java.sql.*" %>
+ <%@page import = "java.sql.*" %>
 <html class="no-js" lang="">
     <head>
         <meta charset="utf-8">
-        <meta http-equiv="x-ua-compatible" content="ie=edge">
         <title></title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
     </head>
@@ -15,6 +14,8 @@
         
         	boolean isExist = false;
         	boolean isCorrect = false;
+        	boolean isAdmin = false;
+        	
         	String ID = request.getParameter("username");	
         	String Passwd = request.getParameter("password");
         	
@@ -32,7 +33,7 @@
 	    		PreparedStatement pstmt = conn.prepareStatement(sql);
 	    		pstmt.setString(1, ID);
 	    		
-	    		rst = pstmt.executeQuery();		// Update문을 실행하기 위해 사용하는 구문
+	    		rst = pstmt.executeQuery();		// Select문을 실행하기 위해 사용하는 구문
 	    		if(rst.next()){
 	    			// 반환값이 있으면 진입하게 된다.
 	    			// 여기서 반환된 비밀번호를 대조해야!
@@ -52,17 +53,26 @@
 	    	catch(SQLException e){
 	    		e.printStackTrace();
 	    	}
-        %>
+	    	%>
+	    	
+	    	<form action = "Input.jsp" method="post" accept-charset="utf-8" name="idform">
+	    		<input type="hidden" name="id" value="">
+	    	</form>
         <script type="text/javascript">
-		window.onload = check;
+		window.onload = check, send;
+		
 		function check(){
 			var exist = "<%= isExist%>";
 			var correct = "<%=isCorrect%>";
+			
 			if(exist == "true")
 			{
 				if(correct == "true")
-				{
-					location.href = "http://localhost:8080/loginapp/main.jsp";
+				{	
+					alert("환영합니다!");
+					document.idform.id.value = <%= ID%>;	// 넘겨받은 학번으로 다시 재설정
+					document.idform.submit();
+					/*location.href = "http://sogong.iptime.org:8080/loginapp/Input.jsp";*/
 					/*http://sogong.iptime.org:8080/loginapp/main.jsp*/
 				}
 				else
