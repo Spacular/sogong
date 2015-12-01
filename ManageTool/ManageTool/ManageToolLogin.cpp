@@ -18,7 +18,7 @@ void CManageToolLogin::MakeConn() {
 		AfxMessageBox(Errmsg);								// 메세지 박스를 띄우고 정해진 내용을 출력한다.
 	if ((retcode = SQLAllocConnect(henv, &hdbc1)) != SQL_SUCCESS)
 		AfxMessageBox(Errmsg);
-	if ((retcode = SQLConnect(hdbc1, (SQLWCHAR *)TEXT("member"/*DSN이름*/), SQL_NTS/*NULL문자 대신*/, (SQLWCHAR *)TEXT("root"/*접속계정*/), SQL_NTS, (SQLWCHAR *)TEXT("542133tlatms"/*비밀번호*/), SQL_NTS)) != SQL_SUCCESS)
+	if ((retcode = SQLConnect(hdbc1, (SQLWCHAR *)TEXT("member"/*DSN이름*/), SQL_NTS/*NULL문자 대신*/, (SQLWCHAR *)TEXT("test"/*접속계정*/), SQL_NTS, (SQLWCHAR *)TEXT("12345678"/*비밀번호*/), SQL_NTS)) != SQL_SUCCESS)
 		AfxMessageBox(Errmsg);
 
 	SQLAllocStmt(hdbc1, &hstmt1);		// 실제 문장 Handle 획득

@@ -61,6 +61,7 @@ BEGIN_MESSAGE_MAP(CManageToolMain, CDialogEx)
 	ON_EN_CHANGE(IDC_EDIT7, &CManageToolMain::OnEnChangeEdit7)
 	ON_BN_CLICKED(IDC_RADIO2, &CManageToolMain::OnBnClickedRadio2)
 	ON_BN_CLICKED(IDC_RADIO3, &CManageToolMain::OnBnClickedRadio3)
+	ON_BN_CLICKED(IDC_RADIO1, &CManageToolMain::OnBnClickedRadio1)
 END_MESSAGE_MAP()
 
 
@@ -78,7 +79,7 @@ void CManageToolMain::MakeConn() {
 		AfxMessageBox(Errmsg);
 	}
 
-	if ((retcode = SQLConnect(hdbc1, (SQLWCHAR *)TEXT("member"/*DSN이름*/), SQL_NTS/*NULL문자 대신*/, (SQLWCHAR *)TEXT("root"/*접속계정*/), SQL_NTS, (SQLWCHAR *)TEXT("542133tlatms"/*비밀번호*/), SQL_NTS)) != SQL_SUCCESS) {
+	if ((retcode = SQLConnect(hdbc1, (SQLWCHAR *)TEXT("member"/*DSN이름*/), SQL_NTS/*NULL문자 대신*/, (SQLWCHAR *)TEXT("test"/*접속계정*/), SQL_NTS, (SQLWCHAR *)TEXT("12345678"/*비밀번호*/), SQL_NTS)) != SQL_SUCCESS) {
 		Errmsg.Format(_T("에러발생! 에러코드: %d"), retcode);
 		AfxMessageBox(Errmsg);
 	}
@@ -238,11 +239,12 @@ StuInfo CManageToolMain::WhoIs(int Loc) {
 	while (SQLFetch(hstmt1) == SQL_SUCCESS);
 
 	if (Pic_size != 0) {
-		strcpy_s(filename, "pic_");
+		CreateDirectory(_T("pic/"), NULL);
+		strcpy_s(filename, "pic/pic_");
 		ofstream output;
 		char num[8];
 		sprintf_s(num, sizeof(num), "%03d.jpg", pos);
-		strcpy_s(filename + 3, sizeof(num), num);
+		strcpy_s(filename + 8, sizeof(num), num);
 
 		output.open(filename, ios::binary);					// 'pic_좌석번호' 의 형식으로 저장
 
@@ -421,7 +423,6 @@ void CManageToolMain::SetProfileImage(CString str)
 	{
 		//strImagePath = _T("res/") + str + _T(".jpg");
 		strImagePath = _T("pic/pic_") + str + _T(".jpg");
-
 	}
 	dc->SetStretchBltMode(COLORONCOLOR); //이거하니깐 화면닿는부분 모양사라짐 
 
@@ -517,6 +518,7 @@ void CManageToolMain::OnEnChangeEdit7()
 
 	// TODO:  여기에 컨트롤 알림 처리기 코드를 추가합니다.
 }
+
 
 void CManageToolMain::OnBnClickedRadio1()
 {

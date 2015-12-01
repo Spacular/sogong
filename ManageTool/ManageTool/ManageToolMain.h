@@ -90,7 +90,7 @@ public:
 	void SetSkin(CDC *pDC);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnEnChangeEdit7();
-	afx_msg void OnBnClickedRadio1();
 	afx_msg void OnBnClickedRadio2();
 	afx_msg void OnBnClickedRadio3();
+	afx_msg void OnBnClickedRadio1();
 };
