@@ -1,9 +1,28 @@
 ﻿<!doctype html>
-<html class="no-js" lang="">
+<html>
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title> 좌석 입력 페이지 </title>
         <meta name="description" content="좌석입력">
+        <%
+            String ID = request.getParameter("id");
+            String count = request.getParameter("count");
+        %>
+        <script type="text/javascript">
+                    window.onload = function(){
+                /*var count = document.getElementById("count").value;*/
+                var count = <%= count %>;
+                alert(count);
+                if (count === null) {
+                    count = "0";
+                    document.getElementById("count").value = count;
+                }
+                alert(count);
+                var id = <%= ID%>;
+                document.checkname.id.value = id;
+                // 넘겨 받은 ID와 count 수치로 세팅.
+            };
+        </script>
         <style>
             .button {
                 display: inline-block;
@@ -54,9 +73,9 @@
             }
         </style>
     </head>
-    <body onload="count();">    
+    <body>    
         <div class="image">
-            <form action ="check_desk.jsp" accept-charset="utf-8" name="check" method = "post">
+            <form action ="checkdesk.jsp" accept-charset="utf-8" name="checkname" method = "post">
                 <input type="hidden" id="count" name="count" value="">
                 <input type="hidden" id="id" name="id" value="">
                 <table>
@@ -65,26 +84,10 @@
                         <td width = "10"></td>
                         <td style="text-align:right;"><input style="text-align:right; width:300px; height:50px; font-size:30pt;" type="text" name="number" id="number" tabindex="1" /></td>
                         <td width = "30"></td>
-                        <td><input type="submit" value="등록" data-wait="Please wait..." class="button" onclick="document.check.onsubmit();"></td>
+                        <td><input type="submit" value="등록" data-wait="Please wait..." name ="버튼" class="button"></td>
                     </tr>
                 </table>
             </form>
         </div>
-        <%
-            String ID = request.getParameter("id");
-        %>
-        <script type="text/javascript">
-            function count() {
-                var count = document.getElementById("count").value;
-                if (count == "") {
-                    count = "0";
-                    document.getElementById("count").value = count;
-                }
-                alert(count);
-                var id = <%= ID%>;
-                document.check.id.value = id;
-                // 넘겨 받은 ID와 count 수치로 세팅.
-            }
-        </script>
     </body>
 </html>

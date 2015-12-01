@@ -59,7 +59,6 @@
 	    		<input type="hidden" name="id" value="">
 	    	</form>
         <script type="text/javascript">
-		window.onload = check, send;
 		
 		function check(){
 			var exist = "<%= isExist%>";
