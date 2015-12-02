@@ -12,12 +12,10 @@
                     window.onload = function(){
                 /*var count = document.getElementById("count").value;*/
                 var count = <%= count %>;
-                alert(count);
                 if (count === null) {
                     count = "0";
                     document.getElementById("count").value = count;
                 }
-                alert(count);
                 var id = <%= ID%>;
                 document.checkname.id.value = id;
                 // 넘겨 받은 ID와 count 수치로 세팅.

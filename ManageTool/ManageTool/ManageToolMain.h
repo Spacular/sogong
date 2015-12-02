@@ -87,9 +87,7 @@ public:
 	CString str_loc;			// 저장된 사진 파일의 경로
 	CStatic m_profileImage;
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
-	void SetSkin(CDC *pDC);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
-	afx_msg void OnEnChangeEdit7();
 	afx_msg void OnBnClickedRadio2();
 	afx_msg void OnBnClickedRadio3();
 	afx_msg void OnBnClickedRadio1();

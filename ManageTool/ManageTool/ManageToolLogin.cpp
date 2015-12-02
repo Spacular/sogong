@@ -18,7 +18,7 @@ void CManageToolLogin::MakeConn() {
 		AfxMessageBox(Errmsg);								// 메세지 박스를 띄우고 정해진 내용을 출력한다.
 	if ((retcode = SQLAllocConnect(henv, &hdbc1)) != SQL_SUCCESS)
 		AfxMessageBox(Errmsg);
-	if ((retcode = SQLConnect(hdbc1, (SQLWCHAR *)TEXT("member"/*DSN이름*/), SQL_NTS/*NULL문자 대신*/, (SQLWCHAR *)TEXT("test"/*접속계정*/), SQL_NTS, (SQLWCHAR *)TEXT("12345678"/*비밀번호*/), SQL_NTS)) != SQL_SUCCESS)
+	if ((retcode = SQLConnect(hdbc1, (SQLWCHAR *)TEXT("loginapp"/*DSN이름*/), SQL_NTS/*NULL문자 대신*/, (SQLWCHAR *)TEXT("genius"/*접속계정*/), SQL_NTS, (SQLWCHAR *)TEXT("12345678"/*비밀번호*/), SQL_NTS)) != SQL_SUCCESS)
 		AfxMessageBox(Errmsg);
 
 	SQLAllocStmt(hdbc1, &hstmt1);		// 실제 문장 Handle 획득
@@ -29,9 +29,8 @@ int CManageToolLogin::isExist(CString ID, CString Pwd) {
 	SQLINTEGER save, save2 = 0;
 	BOOL isExistID = 0, isExistPwd = 0, isAdmin = 0;
 
-	int strLen = Pwd.GetLength();		// CString 타입 변수의 문자열 길이 알아내기
-
-										//char pwd[20];
+	int strLen = Pwd.GetLength();							// CString 타입 변수의 문자열 길이 알아내기
+															//char pwd[20];
 	char* pwd = (char*)calloc(strLen, sizeof(char));		// 동적할당 해주기 *주의* 아래에 주소 넣을떄 pwd다! &pwd 아니다!!!
 															//char* pwd = new char[strLen];
 	char PWD_result[20];

@@ -58,7 +58,7 @@ BEGIN_MESSAGE_MAP(CManageToolMain, CDialogEx)
 	ON_WM_LBUTTONUP()
 	ON_WM_TIMER()
 	ON_WM_ACTIVATE()
-	ON_EN_CHANGE(IDC_EDIT7, &CManageToolMain::OnEnChangeEdit7)
+//	ON_EN_CHANGE(IDC_EDIT7, &CManageToolMain::OnEnChangeEdit7)
 	ON_BN_CLICKED(IDC_RADIO2, &CManageToolMain::OnBnClickedRadio2)
 	ON_BN_CLICKED(IDC_RADIO3, &CManageToolMain::OnBnClickedRadio3)
 	ON_BN_CLICKED(IDC_RADIO1, &CManageToolMain::OnBnClickedRadio1)
@@ -79,7 +79,7 @@ void CManageToolMain::MakeConn() {
 		AfxMessageBox(Errmsg);
 	}
 
-	if ((retcode = SQLConnect(hdbc1, (SQLWCHAR *)TEXT("member"/*DSN이름*/), SQL_NTS/*NULL문자 대신*/, (SQLWCHAR *)TEXT("test"/*접속계정*/), SQL_NTS, (SQLWCHAR *)TEXT("12345678"/*비밀번호*/), SQL_NTS)) != SQL_SUCCESS) {
+	if ((retcode = SQLConnect(hdbc1, (SQLWCHAR *)TEXT("loginapp"/*DSN이름*/), SQL_NTS/*NULL문자 대신*/, (SQLWCHAR *)TEXT("genius"/*접속계정*/), SQL_NTS, (SQLWCHAR *)TEXT("12345678"/*비밀번호*/), SQL_NTS)) != SQL_SUCCESS) {
 		Errmsg.Format(_T("에러발생! 에러코드: %d"), retcode);
 		AfxMessageBox(Errmsg);
 	}
@@ -243,7 +243,7 @@ StuInfo CManageToolMain::WhoIs(int Loc) {
 		strcpy_s(filename, "pic/pic_");
 		ofstream output;
 		char num[8];
-		sprintf_s(num, sizeof(num), "%03d.jpg", pos);
+		sprintf_s(num, sizeof(num), "%03d.jpg", pos + 1);
 		strcpy_s(filename + 8, sizeof(num), num);
 
 		output.open(filename, ios::binary);					// 'pic_좌석번호' 의 형식으로 저장
@@ -277,33 +277,25 @@ void CManageToolMain::OnPaint()
 					   // TODO: 여기에 메시지 처리기 코드를 추가합니다.
 					   // 그리기 메시지에 대해서는 __super::OnPaint()을(를) 호출하지 마십시오.
 
-	//이부분도 마찬가지 좀 다듬어야됨. 지금은 실행만 되게 해놈
-	CDC dcBoardMem;
-	dcBoardMem.CreateCompatibleDC(&dc);
-	CBitmap Bitmap;
-	CRect rect;
-	GetClientRect(&rect);
-	Bitmap.CreateCompatibleBitmap(&dc, rect.Width(), rect.Height());
-	dcBoardMem.SelectObject(&Bitmap);
-	CRect rectUpdate;
-	dc.GetClipBox(&rectUpdate);
-	SetSkin(&dcBoardMem);
-	dc.BitBlt(rectUpdate.left, rectUpdate.top, rectUpdate.Width(), rectUpdate.Height(), &dcBoardMem, rectUpdate.left, rectUpdate.top, SRCCOPY);
-	SetProfileImage(_T(""));	// 이부분 가라임. 고쳐야됨.
-	ReleaseDC(&dcBoardMem);
-
-
 	CPen newPen(PS_SOLID, 1, RGB(0, 0, 0));
-	CPen *pOldPen = dc.SelectObject(&newPen);	//팬 객체에 대한 포인터 저장.(이전 펜으로 되돌아 갈 시 필요.)
+	//CPen *pOldPen = dc.SelectObject(&newPen);	//팬 객체에 대한 포인터 저장.(이전 펜으로 되돌아 갈 시 필요.)
 
-	CPoint initPos = { 30, 30 };						// 시작 좌표
-	CPoint jumpPos = { 50, 30 };						// 점프 할 사이즈
-	CPoint nowPos = initPos;							// 현재 좌표
+	int Init_x = 20;
+	int Init_y = 20;
+	int Pos_x = Init_x;
+	int Pos_y = Init_y;
+	int Interval_y = 30;
+	int Interval_x = (int)(Interval_y * 1.78);
 	int nRows = 10;		// 행(Row)의 수(Number).
 	int nCols = 10;		// 열(Column)의 수.
-	
-	POINT Selected_Seat = { 0, 0 };		// 마우스로 선택한 좌석의 좌표
+
+
+	POINT Selected_Seat;		// 마우스로 선택한 좌석의 좌표
+
+	Selected_Seat.x = 0;	Selected_Seat.y = 0;
+	CRgn classroom[10][10];
 	CRect desk[10][10];
+
 	CString strData = _T("");
 	//strData.Format(_T("X:%03d, Y:%03d"), m_lbdown.x, m_lbdown.y);
 
@@ -317,15 +309,17 @@ void CManageToolMain::OnPaint()
 
 	for (int i = 0; i < nRows; i++) {
 		for (int j = 0; j < nCols; j++) {
-			nowPos.x = j * jumpPos.x + initPos.x;
-			nowPos.y = i * jumpPos.y + initPos.y;
-			//dc.Rectangle(Pos_x, Pos_y, Pos_x + Interval_x, Pos_y + Interval_y);			//이 방법을 쓰면 표시는 된다.
-			desk[i][j] = CRect(nowPos.x + 1, nowPos.y + 1, nowPos.x + 49, nowPos.y + 29);	// 이렇게 하니까 화면에 표시되지가 않는다,
-																							// dc.FillSolidRect(&desk, RGB(0, 0, 0));	사각형 내부 채우는 함수.
-																							// 그래서 위의 CRect를 제대로 표시되지 않더라도 일단 쓴다.
-			// 가로시작, 세로시작, 가로끝, 세로끝(절대좌표)
+			dc.Rectangle(Pos_x, Pos_y, Pos_x + Interval_x, Pos_y + Interval_y);		//이 방법을 쓰면 표시는 된다.
+			desk[i][j] = CRect(Pos_x, Pos_y, Pos_x + Interval_x, Pos_y + Interval_y);	// 이렇게 하니까 화면에 표시되지가 않는다,
+																						// dc.FillSolidRect(&desk, RGB(0, 0, 0));	사각형 내부 채우는 함수.
+																						// 그래서 위의 CRect를 제대로 표시되지 않더라도 일단 쓴다.
+			classroom[i][j].CreateEllipticRgnIndirect(desk[i][j]);		// 이 함수에는 CRect 객체가 필요하다!
+			Pos_x += Interval_x;
 		}
+		Pos_x = Init_x;
+		Pos_y += Interval_y;
 	}
+
 
 	// 가져온 데이터 개수만큼 사각형 내부 색칠
 	for (int i = 0; i < count; i++) 
@@ -335,7 +329,7 @@ void CManageToolMain::OnPaint()
 	
 		if		(result[i].m_warning == 1)	dc.FillSolidRect(&desk[row][column], RGB(255, 0, 0));	// 의심학생은 빨간색으로
 		else if (result[i].m_question == 1)	dc.FillSolidRect(&desk[row][column], RGB(255, 255, 0));	// 질문 있는 학생은 노란색으로
-		else								dc.FillSolidRect(&desk[row][column], RGB(0, 0, 0));		// 그 외의 일반 출석은 검은색으로
+		else	dc.FillSolidRect(&desk[row][column], RGB(0, 0, 0));		// 그 외의 일반 출석은 검은색으로
 	}
 
 	if (m_lbdown != m_Oldlbdown) {
@@ -391,12 +385,11 @@ void CManageToolMain::OnPaint()
 
 					str_loc.Format(_T("%03d"), Loc);
 					SetProfileImage(str_loc);
-					//CString str_id;
-					//str_id.Format(_T("%d"), info.m_id);
-					//SetProfileImage(str_id);	
+					CString str_id;
+					str_id.Format(_T("%d"), info.m_id);
+					SetProfileImage(str_id);	
 
 					m_radio = info.m_attendance;
-					
 					
 					UpdateData(FALSE);		// 값 갱신!
 				}
@@ -481,44 +474,6 @@ void CManageToolMain::OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized)
 	SetProfileImage(str_loc);
 	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
 }
-
-
- //배경스킨 그리기
-void CManageToolMain::SetSkin(CDC *pDC)
-{
-	CDC MemDC;                      //메모리에DC를 만든다. 
-	MemDC.CreateCompatibleDC(pDC);  //화면DC와 호환성을 갖는 메모리 DC 만들기
-
-	CBitmap bitmap;
-	bitmap.LoadBitmap(IDB_BITMAP1);  //리소스에서 비트맵을 읽어 들여DC에 선택
-
-	BITMAP bmpinfo;					//비트맵은 높이와 크기가 모두 다르기에
-
-	bitmap.GetBitmap(&bmpinfo);		//GetBitmap( )로 비트맵오브젝트의 크기를 조사
-
-	CBitmap *pOldBitmap = (CBitmap *)MemDC.SelectObject(&bitmap);
-
-	CRect rect;
-	GetClientRect(&rect);			// 클라이언트 영역 윈도우의 크기를 얻는다.
-
-	pDC->StretchBlt(0, 0, rect.Width(), rect.Height(), &MemDC, 0, 0, bmpinfo.bmWidth, bmpinfo.bmHeight, SRCCOPY); // 비트맵을 화면에 출력한다.
-
-	MemDC.SelectObject(pOldBitmap);  //DC 복원
-	bitmap.DeleteObject();           //비트맵소멸
-	MemDC.DeleteDC();
-}
-
-
-void CManageToolMain::OnEnChangeEdit7()
-{
-	// TODO:  RICHEDIT 컨트롤인 경우, 이 컨트롤은
-	// __super::OnInitDialog() 함수를 재지정 
-	//하고 마스크에 OR 연산하여 설정된 ENM_CHANGE 플래그를 지정하여 CRichEditCtrl().SetEventMask()를 호출하지 않으면
-	// 이 알림 메시지를 보내지 않습니다.
-
-	// TODO:  여기에 컨트롤 알림 처리기 코드를 추가합니다.
-}
-
 
 void CManageToolMain::OnBnClickedRadio1()
 {

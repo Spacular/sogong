@@ -44,7 +44,9 @@
                 PreparedStatement pstmt = conn.prepareStatement(sql);
                 pstmt.setString(1, number);
                 rst = pstmt.executeQuery();		// Select문을 실행하기 위해 사용하는 구문
-                if (rst.next()) {
+                rst.next();
+                String result = rst.getString(1);
+                if (result != null) {
                     // 반환값이 있으면 진입하게 된다.
                     // 여기서 중복값 증가시키고 반환!
                     count_num = Integer.valueOf(count);      // 전달받은 카운트 변수를 정수형으로 변경
@@ -70,7 +72,8 @@
                     request.setAttribute("count", count_num);
                     pageContext.forward("Input.jsp");               // setAttribute로 속성 지정하고 나서 다음 페이지로 넘어간다.
                      */
-                } else {
+                } 
+                else {
                     // 책상이 중복이 아닌경우!
 
                     sql = "update seat set s_check = 'x' where s_id = ?;";
@@ -79,7 +82,7 @@
                     pstmt.setString(1, number);
                     pstmt.executeUpdate();
 
-                    sql = "update seat set s.m_id = ? where s_id = ?;";
+                    sql = "update seat set m_id = ? where s_id = ?;";
                     // 해당 좌석에 배정된 학생도 변경
                     pstmt = conn.prepareStatement(sql);
                     pstmt.setString(1, ID);
