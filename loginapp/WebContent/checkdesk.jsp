@@ -4,7 +4,7 @@
     Author     : simpsons
 --%>
 
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page contentType="text/html" pageEncoding="euc-kr"%>
 <%@ page import = "java.sql.*" %>
 <%@ page import = "java.io.*" %>
 <!DOCTYPE html>
@@ -14,16 +14,25 @@
         <title></title>
     </head>
     <body>
+        <form action ="Input.jsp" method = "post" accept-charset="utf-8" name="back">
+            <input type="hidden" name = "count" value=""/>
+            <input type ="hidden" name ="id" value =""/>
+        </form>
+        <form action ="view.jsp" method ="post" accept-charset ="utf-8" name ="viewpage">
+            <input type ="hidden" name ="desknumber" value = ""/>
+            <input type ="hidden" name ="identification" value = ""/>
+        </form>
         <%
             Connection conn = null;
 
-            String number = request.getParameter("number");         // ì¢Œì„ë²ˆí˜¸
-            String count = request.getParameter("count");           // ì‹¤íŒ¨íšŸìˆ˜
-            String ID = request.getParameter("id");                 // ë„˜ê²¨ë°›ì€ í•™ë²ˆ
+            String number = request.getParameter("number");         // ÁÂ¼®¹øÈ£
+            String count = request.getParameter("count");           // ½ÇÆĞÈ½¼ö
+            String ID = request.getParameter("id");                 // ³Ñ°Ü¹ŞÀº ÇĞ¹ø
 
             boolean isDuplicated = false;
+            boolean isError = false;
 
-            int count_num;                                          // ë„˜ê²¨ë°›ì€ ì‹¤íŒ¨íšŸìˆ˜ê°€ String íƒ€ì…ì´ë¯€ë¡œ Intí˜•ìœ¼ë¡œ ë°›ì•„ì¤„ ë³€ìˆ˜
+            int count_num;                                          // ³Ñ°Ü¹ŞÀº ½ÇÆĞÈ½¼ö°¡ String Å¸ÀÔÀÌ¹Ç·Î IntÇüÀ¸·Î ¹Ş¾ÆÁÙ º¯¼ö
             count_num = Integer.valueOf(count);
             String novalue = "null";
 
@@ -31,7 +40,7 @@
 
             try {
 
-                String url = "jdbc:mysql://localhost:3306/member";
+                String url = "jdbc:mysql://localhost:3306/member?useUnicode=true&characterEncoding=EUC-KR";
                 String DbId = "root";
                 String DbPass = "542133tlatms";
                 ResultSet rst = null;
@@ -40,58 +49,60 @@
                 conn = DriverManager.getConnection(url, DbId, DbPass);
 
                 String sql = "select m_id from seat where s_id = ?;";
-
                 PreparedStatement pstmt = conn.prepareStatement(sql);
                 pstmt.setString(1, number);
-                rst = pstmt.executeQuery();		// Selectë¬¸ì„ ì‹¤í–‰í•˜ê¸° ìœ„í•´ ì‚¬ìš©í•˜ëŠ” êµ¬ë¬¸
-                rst.next();
+                rst = pstmt.executeQuery();		// Select¹®À» ½ÇÇàÇÏ±â À§ÇØ »ç¿ëÇÏ´Â ±¸¹®
+                if(!rst.next()){
+                    test.println("<script type='text/javascript'> alert('¾ø´Â ÁÂ¼®ÀÔ´Ï´Ù. Á¦´ë·Î ÀÔ·ÂÇØÁÖ¼¼¿ä!') </script>");
+                    isError = true;
+                    throw new SQLException("error");
+                }
                 String result = rst.getString(1);
                 if (result != null) {
-                    // ë°˜í™˜ê°’ì´ ìˆìœ¼ë©´ ì§„ì…í•˜ê²Œ ëœë‹¤.
-                    // ì—¬ê¸°ì„œ ì¤‘ë³µê°’ ì¦ê°€ì‹œí‚¤ê³  ë°˜í™˜!
-                    count_num = Integer.valueOf(count);      // ì „ë‹¬ë°›ì€ ì¹´ìš´íŠ¸ ë³€ìˆ˜ë¥¼ ì •ìˆ˜í˜•ìœ¼ë¡œ ë³€ê²½
-                    count_num++;                             // ì¤‘ë³µì´ë‹ˆê¹Œ ì¹´ìš´íŠ¸ í•˜ë‚˜ ì¦ê°€
-                    // ì—¬ê¸°ì„œ ì¹´ìš´íŠ¸ íšŸìˆ˜ì— ë”°ë¼ ì¢Œì„ë“±ë¡ì—í˜ì´ì§€ë¡œ ê°€ì§€ë§Œ warningì´ 1ì´ ë˜ê³ 
-                    // ê²½ê³ ì„± ë©”ì„¸ì§€ ì¶œë ¥ 
+                    // ¹İÈ¯°ªÀÌ ÀÖÀ¸¸é ÁøÀÔÇÏ°Ô µÈ´Ù.
+                    // ¿©±â¼­ Áßº¹°ª Áõ°¡½ÃÅ°°í ¹İÈ¯!
+                    count_num = Integer.valueOf(count);      // Àü´Ş¹ŞÀº Ä«¿îÆ® º¯¼ö¸¦ Á¤¼öÇüÀ¸·Î º¯°æ
+                    count_num++;                             // Áßº¹ÀÌ´Ï±î Ä«¿îÆ® ÇÏ³ª Áõ°¡
+                    // ¿©±â¼­ Ä«¿îÆ® È½¼ö¿¡ µû¶ó ÁÂ¼®µî·Ï¿¡ÆäÀÌÁö·Î °¡Áö¸¸ warningÀÌ 1ÀÌ µÇ°í
+                    // °æ°í¼º ¸Ş¼¼Áö Ãâ·Â 
                     if (count_num < 3) {
-                        test.println("<script type='text/javascript'> alert('ì¤‘ë³µ ì¢Œì„ì…ë‹ˆë‹¤ ë‹¤ì‹œ ì…ë ¥í•´ì£¼ì„¸ìš”.') </script>");
+                        test.println("<script type='text/javascript'> alert('Áßº¹ ÁÂ¼®ÀÔ´Ï´Ù ´Ù½Ã ÀÔ·ÂÇØÁÖ¼¼¿ä.') </script>");
                     } else {
-                        test.println("<script type='text/javascript'> alert('ì¢Œì„ ì¤‘ë³µ 3íšŒ ì´ìƒì…ë‹ˆë‹¤. ì˜ì‹¬í•™ìƒìœ¼ë¡œ ë“±ë¡ë˜ì—ˆìœ¼ë¯€ë¡œ ë‹´ë‹¹êµìˆ˜ì™€ ìƒì˜í•˜ì‹œê¸° ë°”ëë‹ˆë‹¤.') </script>");
+                        test.println("<script type='text/javascript'> alert('ÁÂ¼® Áßº¹ 3È¸ ÀÌ»óÀÔ´Ï´Ù. ÀÇ½ÉÇĞ»ıÀ¸·Î µî·ÏµÇ¾úÀ¸¹Ç·Î ´ã´ç±³¼ö¿Í »óÀÇÇÏ½Ã±â ¹Ù¶ø´Ï´Ù.') </script>");
                         sql = "update member set m_warning = 1 where m_id = ?;";
                         pstmt = conn.prepareStatement(sql);
                         pstmt.setString(1, ID);
                         pstmt.executeUpdate();
-                        // í•´ë‹¹ í•™ìƒ m_warning = 1ë¡œ UpdateQuery ë‚ ë¦¬ê³ 
-                        // ì´ì „ í˜ì´ì§€ë¡œ ì´ë™
-                        // ê²½ê³ ì„± ë©”ì„¸ì§€ ì¶œë ¥
-                        // ì¢Œì„ ì¤‘ë³µ 3íšŒ ì´ˆê³¼ì…ë‹ˆë‹¤. ì˜ì‹¬í•™ìƒìœ¼ë¡œ ë“±ë¡ë˜ì—ˆìœ¼ë¯€ë¡œ ë‹´ë‹¹êµìˆ˜ì™€ ìƒì˜í•˜ì‹œê¸° ë°”ëë‹ˆë‹¤.
+                        // ÇØ´ç ÇĞ»ı m_warning = 1·Î UpdateQuery ³¯¸®°í
+                        // ÀÌÀü ÆäÀÌÁö·Î ÀÌµ¿
+                        // °æ°í¼º ¸Ş¼¼Áö Ãâ·Â
+                        // ÁÂ¼® Áßº¹ 3È¸ ÃÊ°úÀÔ´Ï´Ù. ÀÇ½ÉÇĞ»ıÀ¸·Î µî·ÏµÇ¾úÀ¸¹Ç·Î ´ã´ç±³¼ö¿Í »óÀÇÇÏ½Ã±â ¹Ù¶ø´Ï´Ù.
                     }
                     isDuplicated = true;
-                    /*
-                    request.setAttribute("id", ID);
-                    request.setAttribute("count", count_num);
-                    pageContext.forward("Input.jsp");               // setAttributeë¡œ ì†ì„± ì§€ì •í•˜ê³  ë‚˜ì„œ ë‹¤ìŒ í˜ì´ì§€ë¡œ ë„˜ì–´ê°„ë‹¤.
-                     */
-                } 
+                    
+                    //request.setAttribute("id", ID);
+                    //request.setAttribute("count", count_num);
+                    //pageContext.forward("Input.jsp");               // setAttribute·Î ¼Ó¼º ÁöÁ¤ÇÏ°í ³ª¼­ ´ÙÀ½ ÆäÀÌÁö·Î ³Ñ¾î°£´Ù.
+                }
                 else {
-                    // ì±…ìƒì´ ì¤‘ë³µì´ ì•„ë‹Œê²½ìš°!
+                    // Ã¥»óÀÌ Áßº¹ÀÌ ¾Æ´Ñ°æ¿ì!
 
                     sql = "update seat set s_check = 'x' where s_id = ?;";
-                    // í•´ë‹¹ ì¢Œì„ì˜ ìƒíƒœë¥¼ ì•‰ì•„ìˆëŠ” ìƒíƒœë¡œ ë³€ê²½.
+                    // ÇØ´ç ÁÂ¼®ÀÇ »óÅÂ¸¦ ¾É¾ÆÀÖ´Â »óÅÂ·Î º¯°æ.
                     pstmt = conn.prepareStatement(sql);
                     pstmt.setString(1, number);
                     pstmt.executeUpdate();
 
                     sql = "update seat set m_id = ? where s_id = ?;";
-                    // í•´ë‹¹ ì¢Œì„ì— ë°°ì •ëœ í•™ìƒë„ ë³€ê²½
+                    // ÇØ´ç ÁÂ¼®¿¡ ¹èÁ¤µÈ ÇĞ»ıµµ º¯°æ
                     pstmt = conn.prepareStatement(sql);
                     pstmt.setString(1, ID);
                     pstmt.setString(2, number);
                     pstmt.executeUpdate();
 
-                    // request.setAttribute("id", ID);
-                    // request.setAttribute("count", count_num);
-                    // pageContext.forward("view.jsp");               // setAttributeë¡œ ì†ì„± ì§€ì •í•˜ê³  ë‚˜ì„œ ë‹¤ìŒ í˜ì´ì§€ë¡œ ë„˜ì–´ê°„ë‹¤.
+                   //request.setAttribute("id", ID);
+                   //request.setAttribute("count", count_num);
+                   //pageContext.forward("view.jsp");               // setAttribute·Î ¼Ó¼º ÁöÁ¤ÇÏ°í ³ª¼­ ´ÙÀ½ ÆäÀÌÁö·Î ³Ñ¾î°£´Ù.
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -100,10 +111,23 @@
         <script type ="text/javascript">
             window.onload = function () {
                 var isDuplicated = <%= isDuplicated%>;
-                if (isDuplicated === true) {
-                    location.href = "http://sogong.iptime.org:8084/loginapp/Input.jsp";
+                var count = <%= count_num %>;
+                var isError = <%= isError %>;
+                var number = <%= number %>;
+                var id = <%= ID %>;
+                if(isError === true){
+                    window.history.go(-1);
+                }
+                else if (isDuplicated === true) {
+                    //document.location.href = "http://sogong.iptime.org:8084/loginapp/Input.jsp?count=";
+                    document.back.count.value = count;
+                    document.back.id.value = id;
+                    document.back.submit();
                 } else {
-                    location.href = "http://sogong.iptime.org:8084/loginapp/view.jsp";
+                    document.viewpage.desknumber.value = number;
+                    document.viewpage.identification.value = id;
+                    //document.location.href = "http://sogong.iptime.org:8084/loginapp/view.jsp";                   
+                    document.viewpage.submit();
                 }
             };
         </script>

@@ -9,17 +9,26 @@
             String count = request.getParameter("count");
         %>
         <script type="text/javascript">
-                    window.onload = function(){
+                window.onload = function(){
+                var id = <%= ID%>;
+                if(id === null){
+                    alert("올바르지 않은 접근입니다!!");
+                    window.history.go(-1);
+                }
                 /*var count = document.getElementById("count").value;*/
                 var count = <%= count %>;
                 if (count === null) {
                     count = "0";
                     document.getElementById("count").value = count;
                 }
-                var id = <%= ID%>;
+                else{
+                    document.getElementById("count").value = count;
+                }
                 document.checkname.id.value = id;
                 // 넘겨 받은 ID와 count 수치로 세팅.
             };
+            
+            
         </script>
         <style>
             .button {
@@ -73,14 +82,14 @@
     </head>
     <body>    
         <div class="image">
-            <form action ="checkdesk.jsp" accept-charset="utf-8" name="checkname" method = "post">
+            <form action ="checkdesk.jsp" accept-charset="utf-8" name="checkname" method = "post" onsubmit = "">
                 <input type="hidden" id="count" name="count" value="">
                 <input type="hidden" id="id" name="id" value="">
                 <table>
                     <tr>
                         <th style="color:white; text-align:right;"><label for="username">좌석번호:</label></th>
                         <td width = "10"></td>
-                        <td style="text-align:right;"><input style="text-align:right; width:300px; height:50px; font-size:30pt;" type="text" name="number" id="number" tabindex="1" /></td>
+                        <td style="text-align:right;"><input style="text-align:right; width:300px; height:50px; font-size:30pt;" type="number" name="number" id="number" tabindex="1" /></td>
                         <td width = "30"></td>
                         <td><input type="submit" value="등록" data-wait="Please wait..." name ="버튼" class="button"></td>
                     </tr>

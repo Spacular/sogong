@@ -1,5 +1,5 @@
 <!doctype html>
-<%@page language="java" contentType="text/html; charset=UTF-8"
+<%@page language="java" contentType="text/html; charset=euc-kr"
     pageEncoding="UTF-8"%>
  <%@page import = "java.sql.*" %>
 <html class="no-js" lang="">
@@ -20,7 +20,7 @@
         	String Passwd = request.getParameter("password");
         	
 	    	try{
-	    		String url = "jdbc:mysql://localhost:3306/member";
+	    		String url = "jdbc:mysql://localhost:3306/member?useUnicode=true&characterEncoding=EUC-KR";
 	    		String DbId = "root";
 	    		String DbPass = "542133tlatms";
 	    		ResultSet rst = null;
@@ -59,7 +59,6 @@
 	    		<input type="hidden" name="id" value="">
 	    	</form>
         <script type="text/javascript">
-		
 		function check(){
 			var exist = "<%= isExist%>";
 			var correct = "<%=isCorrect%>";
@@ -68,7 +67,7 @@
 			{
 				if(correct == "true")
 				{	
-					alert("환영합니다!");
+					//alert("환영합니다!");
 					document.idform.id.value = <%= ID%>;	// 넘겨받은 학번으로 다시 재설정
 					document.idform.submit();
 					/*location.href = "http://sogong.iptime.org:8080/loginapp/Input.jsp";*/
