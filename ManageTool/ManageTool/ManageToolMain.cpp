@@ -14,8 +14,6 @@ using namespace std;
 
 IMPLEMENT_DYNAMIC(CManageToolMain, CDialogEx)
 
-
-
 CManageToolMain::CManageToolMain(CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_MAINDLG, pParent)
 	, m_name(_T(""))
@@ -149,6 +147,8 @@ StuInfo CManageToolMain::WhoIs(int Loc) {
 	SQLWCHAR* check_query = (SQLWCHAR*)TEXT("select m.m_id from member as m inner join seat as s on m.m_id = s.m_id where s_location = ?;");
 	SQLWCHAR* pic_size_query = (SQLWCHAR*)TEXT("select octet_length(m_picture) from member as m inner join seat as s on m.m_id = s.m_id and s_location = ?;");
 	SQLWCHAR* query = (SQLWCHAR*)TEXT("select m.m_id, m_name, m_department, m_gen, m_birthdate, m_picture, m_attendance, m_qcontent from member as m inner join seat as s on m.m_id = s.m_id and s_location = ?;");
+	SQLWCHAR* question_query_one = (SQLWCHAR*)TEXT("update member set m_question = 0 where m_id = ?;");
+	SQLWCHAR* question_query_two = (SQLWCHAR*)TEXT("update member set m_qcontent = '' where m_id = ?;");
    
 	//ㅊㄱ 학생좌석이 어디있는지 알아내는 부분 
 	if ((retcode = SQLPrepare(hstmt1, /*보낼 SQL 문자열*/check_query, SQL_NTS)) != SQL_SUCCESS) {
@@ -238,6 +238,35 @@ StuInfo CManageToolMain::WhoIs(int Loc) {
 	}
 	while (SQLFetch(hstmt1) == SQL_SUCCESS);
 
+	/*********************************** 알아낸 학번으로 해당 학생의 질문의사를 초기화시키는 SQL **************************************/
+	if ((retcode = SQLPrepare(hstmt1, /*보낼 SQL 문자열*/question_query_one, SQL_NTS)) != SQL_SUCCESS) {
+		Errmsg.Format(_T("에러발생! 에러코드: %d"), retcode);
+		AfxMessageBox(Errmsg);
+	}
+	else {
+		if ((retcode = SQLBindParameter(hstmt1, 1, SQL_PARAM_INPUT, SQL_C_ULONG, SQL_INTEGER, 0, 0, &stuinfo.m_id, 0, NULL)) != SQL_SUCCESS) {
+			Errmsg.Format(_T("에러발생! 에러코드: %d"), retcode);
+			AfxMessageBox(Errmsg);
+		}
+	}
+	if (retcode == SQL_SUCCESS)
+		retcode = SQLExecute(hstmt1);
+	/*****************************************************************************************************************************/
+	/******************************** 알아낸 학번으로 해당 학생의 질문내용을 초기화시키는 SQL *******************************************/
+	if ((retcode = SQLPrepare(hstmt1, /*보낼 SQL 문자열*/question_query_two, SQL_NTS)) != SQL_SUCCESS) {
+		Errmsg.Format(_T("에러발생! 에러코드: %d"), retcode);
+		AfxMessageBox(Errmsg);
+	}
+	else {
+		if ((retcode = SQLBindParameter(hstmt1, 1, SQL_PARAM_INPUT, SQL_C_ULONG, SQL_INTEGER, 0, 0, &stuinfo.m_id, 0, NULL)) != SQL_SUCCESS) {
+			Errmsg.Format(_T("에러발생! 에러코드: %d"), retcode);
+			AfxMessageBox(Errmsg);
+		}
+	}
+	if (retcode == SQL_SUCCESS)
+		retcode = SQLExecute(hstmt1);
+	/****************************************************************************************************************************/
+	
 	if (Pic_size != 0) {
 		CreateDirectory(_T("pic/"), NULL);
 		strcpy_s(filename, "pic/pic_");
@@ -304,7 +333,7 @@ void CManageToolMain::OnPaint()
 		this->MakeConn();
 		Scan(result);
 		isFirst = FALSE;
-		SetTimer(1, 10000, NULL);		// 10초에 한 번 꼴로 확인!
+		SetTimer(1, 5000, NULL);		// 5초에 한 번 꼴로 확인!
 	}
 
 	for (int i = 0; i < nRows; i++) {
@@ -343,7 +372,7 @@ void CManageToolMain::OnPaint()
 		info.m_birthdate.day = NULL;	info.m_birthdate.day = NULL; info.m_birthdate.day = NULL;	info.m_id = NULL;
 		strcpy_s(info.m_department, "");	strcpy_s(info.m_gen, "");	strcpy_s(info.m_name, ""); // m_qcontent = "";
 
-		for (int i = 0; i < nRows; i++) {
+		for (int i = 0; i < nRows; i++) { 
 			for (int j = 0; j < nCols; j++) {
 				result = desk[i][j].PtInRect(m_lbdown);
 				if (result) {
@@ -388,7 +417,6 @@ void CManageToolMain::OnPaint()
 					CString str_id;
 					str_id.Format(_T("%d"), info.m_id);
 					SetProfileImage(str_id);	
-
 					m_radio = info.m_attendance;
 					
 					UpdateData(FALSE);		// 값 갱신!
